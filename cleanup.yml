@@ -3,11 +3,11 @@
   hosts: monitoring_server
   become: yes
 
-  # --- BƯỚC CẢNH BÁO ---
+  # --- Warning ---
   vars_prompt:
     - name: "confirm_delete"
-      prompt: "\n!!! CẢNH BÁO NGUY HIỂM !!!\nLệnh này sẽ XÓA SẠCH Zabbix, MariaDB, Nginx và TOÀN BỘ DỮ LIỆU.\nBạn có chắc chắn muốn tiếp tục không? (Gõ 'yes' để xác nhận)"
-      private: no # Để Mác thấy chữ mình gõ
+      prompt: "\n!!! WARNING !!!\nThis command will PERMANENTLY DELETE Zabbix, MariaDB, Nginx and ALL DATA.\nAre you sure you want to continue? (Type 'yes' to confirm)"
+      private: no 
 
   tasks:
     - name: "Checking confirmation"
@@ -58,4 +58,4 @@
 
     - name: "Notify Success"
       debug:
-        msg: "Hệ thống đã được dọn dẹp trắng án. Mác có thể cài lại từ đầu ngay bây giờ."
+        msg: "The system has been cleaned up. You can reinstall from scratch now"

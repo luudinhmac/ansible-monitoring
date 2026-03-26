@@ -1,6 +1,6 @@
 # 🚀 Zabbix 7.0 & Grafana Automation Stack
 
-Dự án này thực hiện tự động hóa hoàn toàn quy trình triển khai hệ thống giám sát (Monitoring) trên nền tảng **Ubuntu 24.04 LTS**. Hệ thống được thiết kế tối ưu cho hạ tầng mạng và hệ thống tại **Thi Thiên**, đảm bảo tính bảo mật và hiệu suất cao.
+Dự án này thực hiện tự động hóa hoàn toàn quy trình triển khai hệ thống giám sát (Monitoring) trên nền tảng **Ubuntu 24.04 LTS**. Hệ thống được thiết kế tối ưu cho hạ tầng mạng và hệ thống tại **SPC**, đảm bảo tính bảo mật và hiệu suất cao.
 
 ---
 
@@ -106,9 +106,10 @@ Cảnh báo: Lệnh này sẽ yêu cầu bạn xác nhận bằng cách gõ yes.
 
 🛡 Bảo mật Git
 Dự án được cấu hình để không upload file group_vars/all.yml lên GitHub. Hãy đảm bảo file .gitignore của bạn có nội dung sau:
-
-Plaintext
+```bash
 group_vars/all.yml
 .vault_pass.txt
 *.retry
-Tác giả: Lưu Đình Mác
+```
+
+# Tác giả: Lưu Đình Mác
