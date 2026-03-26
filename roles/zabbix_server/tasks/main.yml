@@ -1,0 +1,89 @@
+---
+- name: "Ensure Apache2 is removed to avoid Port 80 conflict"
+  apt:
+    name: apache2
+    state: absent
+    purge: yes
+
+- name: "Add Zabbix 7.0 LTS Repo"
+  apt:
+    deb: "https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.0-1+ubuntu24.04_all.deb"
+
+- name: "Install Zabbix, Nginx & PHP-FPM"
+  apt:
+    name: [zabbix-server-mysql, zabbix-frontend-php, zabbix-nginx-conf, zabbix-sql-scripts, zabbix-agent, nginx, php8.3-fpm]
+    state: present
+    update_cache: yes
+
+- name: "Optimize PHP settings for Zabbix Production"
+  lineinfile:
+    path: "/etc/php/8.3/fpm/php.ini"
+    regexp: "^{{ item.key }} ="
+    line: "{{ item.key }} = {{ item.value }}"
+  loop:
+    - { key: "memory_limit", value: "256M" } # Tăng gấp đôi để xử lý đồ họa mượt hơn
+    - { key: "post_max_size", value: "32M" }
+    - { key: "upload_max_filesize", value: "32M" }
+    - { key: "max_execution_time", value: "300" }
+    - { key: "max_input_time", value: "300" }
+  notify: "restart php-fpm"
+
+- name: "Import Database Schema"
+  shell: |
+    zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql -uzabbix -p"{{ zabbix_db_pass }}" zabbix
+    touch /etc/zabbix/.schema_imported
+  args:
+    creates: "/etc/zabbix/.schema_imported"
+
+- name: "Fix Zabbix Runtime Directory"
+  file:
+    path: "/run/zabbix"
+    state: directory
+    owner: zabbix
+    group: zabbix
+    mode: '0775'
+
+- name: "Configure Zabbix Server"
+  template:
+    src: zabbix_server.conf.j2
+    dest: "/etc/zabbix/zabbix_server.conf"
+  notify: "restart zabbix"
+
+- name: "Remove Nginx default site"
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+
+- name: "Remove old Zabbix config file before symlinking"
+  file:
+    path: "/etc/nginx/conf.d/zabbix.conf"
+    state: absent
+
+- name: "Create Symlink for Zabbix Nginx config"
+  file:
+    src: "/etc/zabbix/nginx.conf"
+    dest: "/etc/nginx/conf.d/zabbix.conf"
+    state: link
+    force: yes
+  notify: "restart nginx"
+
+- name: "Ensure all services are started"
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop: [zabbix-server, php8.3-fpm, nginx]
+
+- name: "Auto-configure Zabbix Web (Skip Setup Wizard)"
+  template:
+    src: "zabbix.conf.php.j2"
+    dest: "/etc/zabbix/web/zabbix.conf.php"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: "Restart Nginx and PHP to apply Web config"
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop: [nginx, php8.3-fpm]

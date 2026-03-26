@@ -1,0 +1,11 @@
+# Không upload file chứa pass Vault 
+.vault_pass.txt
+*.retry
+
+# Không upload các file tạm của hệ thống
+.DS_Store
+__pycache__/
+*.pyc
+
+# Chặn file chứa mật khẩu Vault
+group_vars/all.yml

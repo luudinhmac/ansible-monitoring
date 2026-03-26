@@ -1,0 +1,61 @@
+---
+- name: "Full Cleanup: Remove Monitoring Stack with Confirmation"
+  hosts: monitoring_server
+  become: yes
+
+  # --- BƯỚC CẢNH BÁO ---
+  vars_prompt:
+    - name: "confirm_delete"
+      prompt: "\n!!! CẢNH BÁO NGUY HIỂM !!!\nLệnh này sẽ XÓA SẠCH Zabbix, MariaDB, Nginx và TOÀN BỘ DỮ LIỆU.\nBạn có chắc chắn muốn tiếp tục không? (Gõ 'yes' để xác nhận)"
+      private: no # Để Mác thấy chữ mình gõ
+
+  tasks:
+    - name: "Checking confirmation"
+      meta: end_play
+      when: confirm_delete | lower != 'yes'
+
+    - name: "Stopping services"
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop: [zabbix-server, zabbix-agent, nginx, mariadb, grafana-server, php8.3-fpm]
+      ignore_errors: yes
+
+    - name: "Purging packages and configs"
+      apt:
+        name: 
+          - zabbix-server-mysql
+          - zabbix-frontend-php
+          - zabbix-nginx-conf
+          - zabbix-sql-scripts
+          - zabbix-agent
+          - zabbix-release
+          - mariadb-server
+          - mariadb-common
+          - nginx
+          - "php8.3*"
+          - grafana
+        state: absent
+        purge: yes
+      
+    - name: "Deleting data directories (Permanent)"
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/zabbix
+        - /etc/nginx
+        - /etc/mysql
+        - /var/lib/mysql
+        - /var/lib/zabbix
+        - /var/log/zabbix
+        - /usr/share/zabbix
+
+    - name: "Cleaning up Apt"
+      apt:
+        autoremove: yes
+        update_cache: yes
+
+    - name: "Notify Success"
+      debug:
+        msg: "Hệ thống đã được dọn dẹp trắng án. Mác có thể cài lại từ đầu ngay bây giờ."

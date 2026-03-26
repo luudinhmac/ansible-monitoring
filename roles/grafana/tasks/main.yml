@@ -1,0 +1,28 @@
+- name: Install dependencies for Grafana
+  apt:
+    name: [apt-transport-https, software-properties-common, wget]
+    state: present
+
+- name: Add Grafana GPG key
+  get_url:
+    url: https://apt.grafana.com/gpg.key
+    dest: /etc/apt/keyrings/grafana.key
+    mode: '0644'
+
+- name: Add Grafana Repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.key] https://apt.grafana.com stable main"
+    state: present
+    filename: grafana
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+    update_cache: yes
+
+- name: Start and Enable Grafana Service
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started
