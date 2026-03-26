@@ -21,7 +21,7 @@
     regexp: "^{{ item.key }} ="
     line: "{{ item.key }} = {{ item.value }}"
   loop:
-    - { key: "memory_limit", value: "256M" } # Tăng gấp đôi để xử lý đồ họa mượt hơn
+    - { key: "memory_limit", value: "256M" } #Increase memory limit for better performance
     - { key: "post_max_size", value: "32M" }
     - { key: "upload_max_filesize", value: "32M" }
     - { key: "max_execution_time", value: "300" }
