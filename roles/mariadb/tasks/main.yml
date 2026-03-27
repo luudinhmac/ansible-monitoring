@@ -1,6 +1,6 @@
 - name: Install MariaDB Server
   apt:
-    name: ["mariadb-server", "python3-mysqldb"]
+    name: ["mariadb-server", "python3-pymysql"]
     state: present
     update_cache: yes
 
