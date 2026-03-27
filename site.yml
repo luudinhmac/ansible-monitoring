@@ -3,7 +3,6 @@
   hosts: monitoring_server
   become: yes
   roles:
-    - common
     - mariadb
     - zabbix_server
     - grafana
