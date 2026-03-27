@@ -26,3 +26,28 @@
     name: grafana-server
     enabled: yes
     state: started
+
+# --- PHẦN CÀI ĐẶT PLUGIN BỔ SUNG ---
+
+- name: Ensure Grafana plugins directory exists with correct ownership
+  file:
+    path: /var/lib/grafana/plugins
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+
+- name: Install NOC and Zabbix Plugins
+  grafana_plugin:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "alexanderzobnin-zabbix-app"      # Plugin kết nối Zabbix
+    - "knightss27-weathermap-panel"     # Sơ đồ tải mạng (Weathermap)
+  register: plugin_status
+
+- name: Restart Grafana to activate plugins
+  systemd:
+    name: grafana-server
+    state: restarted
+  when: plugin_status.changed
