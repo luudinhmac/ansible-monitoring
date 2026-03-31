@@ -48,11 +48,16 @@ ansible-vault create group_vars/all.yml
 Nội dung biến cần định nghĩa:
 
 ```bash
+ansible_become_pass: "admin"
 zabbix_db_pass: "MacLD_Secure_2026"
 zabbix_version: "7.0"
 timezone: "Asia/Ho_Chi_Minh"
 server_ip: "192.168.157.133"
 ```
+#### Tạo file .vault_pass.txt chứa mật khẩu vault
+```sh
+chmod 600 ~/.vault_pass.txt
+``` 
 ## 📂 Cấu trúc dự án
 Tổ chức thư mục dự án theo tiêu chuẩn Role-based:
 
@@ -64,7 +69,7 @@ cd ~/ansible-monitoring
 
 Sơ đồ thư mục:
 Plaintext
-~/ansible-monitoring/
+```sh ~/ansible-monitoring/
 ├── site.yml                # Playbook thực thi cài đặt chính
 ├── cleanup.yml             # Playbook xóa trắng tài nguyên (Reset Lab)
 ├── inventory.ini           # Quản lý danh sách IP Server
@@ -74,13 +79,13 @@ Plaintext
     ├── mariadb/            # Tự động cài đặt & Cấu hình MariaDB
     ├── zabbix_server/      # Tự động cài đặt Zabbix, Nginx & PHP 8.3
     └── grafana/            # Tự động cài đặt Grafana Dashboard
-
+```
 ### 🚀 Quy trình triển khai
 Bước 1: Khởi chạy Playbook
 Thực hiện lệnh sau để bắt đầu quá trình cài đặt tự động:
 
 ```bash
-ansible-playbook site.yml --ask-vault-pass -K
+ansible-playbook site.yml
 ```
 Bước 2: Kiểm tra kết quả
 Zabbix Web UI: http://192.168.157.133
